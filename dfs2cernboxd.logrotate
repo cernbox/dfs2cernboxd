@@ -1,4 +1,4 @@
-/var/log/ocproxy/ocproxy_http.log {
+/var/log/dfs2cernboxd/dfs2cernboxd_http.log {
     daily
     rotate 365
     copytruncate
@@ -8,7 +8,7 @@
     missingok
 }
 
-/var/log/ocproxy/ocproxy_app.log {
+/var/log/dfs2cernboxd/dfs2cernboxd_app.log {
     daily
     rotate 365
     copytruncate
