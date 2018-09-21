@@ -46,8 +46,8 @@ func main() {
 
 	router := &router{mux.NewRouter(), gc.GetString("shared-secret"), gc.GetString("reva-tcp-address"), logger, nil}
 
-	router.HandleFunc("/createhomedir/{username}", router.checkSharedSecret(router.createHomeDir)).Methods("POST")
-	router.HandleFunc("/checkhomedir/{username}", router.checkSharedSecret(router.checkHomeDir)).Methods("GET")
+	router.HandleFunc("/index.php/apps/cernboxnice/createhomedir/{username}", router.checkSharedSecret(router.createHomeDir)).Methods("POST")
+	router.HandleFunc("/index.php/apps/cernboxnice/checkhomedir/{username}", router.checkSharedSecret(router.checkHomeDir)).Methods("GET")
 
 	loggedRouter := gologger.GetLoggedHTTPHandler(gc.GetString("http-log"), router)
 
