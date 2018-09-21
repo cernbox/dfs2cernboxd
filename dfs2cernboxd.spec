@@ -4,7 +4,7 @@
 
 Name: dfs2cernboxd
 Summary: DFS to CERNBox migration daemon
-Version: 0.0.1
+Version: 0.0.2
 Release: 1%{?dist}
 License: AGPLv3
 BuildRoot: %{_tmppath}/%{name}-buildroot
@@ -54,5 +54,6 @@ rm -rf %buildroot/
 
 
 %changelog
+* Mon Sep 21 2018 Hugo Gonzalez Labrador <hugo.gonzalez.labrador@cern.ch> 0.0.2
 * Thu Aug 30 2018 Hugo Gonzalez Labrador <hugo.gonzalez.labrador@cern.ch> 0.0.1
 - First version
