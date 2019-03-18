@@ -11,7 +11,7 @@ import (
 
 	"github.com/cernbox/gohub/goconfig"
 	"github.com/cernbox/gohub/gologger"
-	"github.com/cernbox/reva/api"
+	"github.com/cernbox/revaold/api"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
@@ -244,7 +244,24 @@ func (ro *router) checkHomeDir(w http.ResponseWriter, r *http.Request) {
 		if res.Status == api.StatusCode_OK {
 			// update dirs map
 			dirs[dir] = true
+		} else {
+			// lowercase check
+			lower := strings.ToLower(path)
+			req := &api.PathReq{Path: lower}
+			res, err := client.Inspect(ctx, req)
+			if err != nil {
+				ro.logger.Error("error inspecting dir: "+dir, zap.Error(err))
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			if res.Status == api.StatusCode_OK {
+				// update dirs map
+				dirs[dir] = true
+			}
+
 		}
+
 	}
 
 	response := struct {
