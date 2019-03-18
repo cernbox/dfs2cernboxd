@@ -246,7 +246,7 @@ func (ro *router) checkHomeDir(w http.ResponseWriter, r *http.Request) {
 			dirs[dir] = true
 		} else {
 			// lowercase check
-			lower := strings.ToLower(path)
+			lower := fmt.Sprintf("/home/%s", strings.ToLower(dir))
 			req := &api.PathReq{Path: lower}
 			res, err := client.Inspect(ctx, req)
 			if err != nil {
@@ -258,6 +258,22 @@ func (ro *router) checkHomeDir(w http.ResponseWriter, r *http.Request) {
 			if res.Status == api.StatusCode_OK {
 				// update dirs map
 				dirs[dir] = true
+			} else {
+				// uppercase check
+				upper := fmt.Sprintf("/home/%s", strings.ToUpper(dir))
+				req := &api.PathReq{Path: upper}
+				res, err := client.Inspect(ctx, req)
+				if err != nil {
+					ro.logger.Error("error inspecting dir: "+dir, zap.Error(err))
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+
+				if res.Status == api.StatusCode_OK {
+					// update dirs map
+					dirs[dir] = true
+				}
+
 			}
 
 		}
