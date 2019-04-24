@@ -1,0 +1,7 @@
+tcp-address: "0.0.0.0:1088"
+app-log: "/var/log/dfs2cernboxd/dfs2cernboxd_app.log"
+http-log: "/var/log/dfs2cernboxd/dfs2cernboxd_http.log"
+log-level: "debug"
+reva-tcp-address: "localhost:9998" # reva with impersonation capabilities
+shared-secret: "1234"
+accepted-dirs: "Documents:true,Music:true,Pictures:true,Videos:true,WINDOWS/Desktop:true,WINDOWS/Favorites:true,WINDOWS/Links:true"
