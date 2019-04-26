@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/cernbox/gohub/goconfig"
@@ -36,6 +37,8 @@ func init() {
 	gc.Add("shared-secret", "bar", "secret to contact the API.")
 	gc.Add("reva-tcp-address", "localhost:9998", "tcp address of the REVA server.")
 
+	gc.Add("accepted-dirs", "", "Map string bool with the list of accepted folders to be created, and wether they are mandatory to exist or not")
+
 	gc.BindFlags()
 	gc.ReadConfig()
 }
@@ -44,7 +47,16 @@ func main() {
 
 	logger := gologger.New(gc.GetString("log-level"), gc.GetString("app-log"))
 
-	router := &router{mux.NewRouter(), gc.GetString("shared-secret"), gc.GetString("reva-tcp-address"), logger, nil}
+	acceptedDirs := map[string]bool{}
+
+	for _, folder := range strings.Split(gc.GetString("accepted-dirs"), ",") {
+		folderArr := strings.Split(folder, ":")
+		key := strings.Trim(folderArr[0], " ")
+		value, _ := strconv.ParseBool(folderArr[1])
+		acceptedDirs[key] = value
+	}
+
+	router := &router{mux.NewRouter(), gc.GetString("shared-secret"), gc.GetString("reva-tcp-address"), acceptedDirs, logger, nil}
 
 	router.HandleFunc("/index.php/apps/cernboxnice/createhomedir/{username}", router.checkSharedSecret(router.createHomeDir)).Methods("POST")
 	router.HandleFunc("/index.php/apps/cernboxnice/checkhomedir/{username}", router.checkSharedSecret(router.checkHomeDir)).Methods("GET")
@@ -85,6 +97,7 @@ type router struct {
 
 	sharedSecret string
 	revaAddress  string
+	acceptedDirs map[string]bool
 
 	logger *zap.Logger
 
@@ -140,6 +153,16 @@ func (ro *router) createHomeDir(w http.ResponseWriter, r *http.Request) {
 	dirs := []string{}
 	for _, dir := range decoded.Dirs {
 		dirs = append(dirs, path.Clean(dir))
+	}
+
+	// Check if the provided directories are accepted
+	for _, dir := range dirs {
+		_, ok := ro.acceptedDirs[dir]
+		if !ok {
+			ro.logger.Error("Invalid directory given", zap.String("directory", dir))
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 	}
 
 	header := metadata.New(map[string]string{"authorization": "user-bearer " + token})
@@ -230,8 +253,14 @@ func (ro *router) checkHomeDir(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// homedirectory exists and we check provided list of directories
-	dirs := map[string]bool{"Favorites": false, "Links": false, "Desktop": false, "Documents": false, "Music": false, "Pictures": false, "Videos": false}
-	for dir, _ := range dirs {
+	dirs := map[string]bool{}
+	for dir, check := range ro.acceptedDirs {
+
+		if !check {
+			// This directory is allowed but not necessary to exist
+			continue
+		}
+
 		path := fmt.Sprintf("/home/%s", dir)
 		req := &api.PathReq{Path: path}
 		res, err := client.Inspect(ctx, req)
@@ -272,6 +301,8 @@ func (ro *router) checkHomeDir(w http.ResponseWriter, r *http.Request) {
 				if res.Status == api.StatusCode_OK {
 					// update dirs map
 					dirs[dir] = true
+				} else {
+					dirs[dir] = false
 				}
 
 			}

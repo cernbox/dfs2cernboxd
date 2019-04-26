@@ -4,7 +4,7 @@
 
 Name: dfs2cernboxd
 Summary: DFS to CERNBox migration daemon
-Version: 0.0.4
+Version: 0.0.5
 Release: 1%{?dist}
 License: AGPLv3
 BuildRoot: %{_tmppath}/%{name}-buildroot
@@ -54,6 +54,11 @@ rm -rf %buildroot/
 
 
 %changelog
+* Wed Apr 24 2019 Diogo Castro <diogo.castro@cern.ch> 0.0.5
+- Allowed directories defined by configuration
+- Only create folders allowed by us
+- Only check created folders if defined as mandatory
+- Update the list of allowed folders with new tree structure
 * Mon Mar 18 2019 Hugo Gonzalez Labrador <hugo.gonzalez.labrador@cern.ch> 0.0.4
 - Add case-insentive check for DFS folders: Documents, documents, DOCUMENTS
 * Tue Dec 18 2018 Hugo Gonzalez Labrador <hugo.gonzalez.labrador@cern.ch> 0.0.3
