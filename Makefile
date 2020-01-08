@@ -19,6 +19,7 @@ rpmdefines=--define='_topdir ${rpmbuild}' \
 
 dist: clean
 #	dep ensure
+	go get
 	go build 
 	@mkdir -p $(PACKAGE)-$(VERSION)
 	@cp -r $(FILES_TO_RPM) $(PACKAGE)-$(VERSION)
@@ -40,3 +41,7 @@ srpm: prepare $(SPECFILE)
 rpm: srpm
 	rpmbuild --nodeps -bb $(rpmdefines) $(SPECFILE)
 	cp $(rpmbuild)/RPMS/x86_64/* .
+
+build:
+	docker build -t cbox_rpm_builder_img .
+	docker run --rm -it -v ${CURDIR}:/root/go/src/github.com/cernbox/dfs2cernboxd -w /root/go/src/github.com/cernbox/dfs2cernboxd cbox_rpm_builder_img bash -lc "make rpm"
