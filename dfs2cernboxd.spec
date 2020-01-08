@@ -4,7 +4,7 @@
 
 Name: dfs2cernboxd
 Summary: DFS to CERNBox migration daemon
-Version: 0.0.5
+Version: 0.0.6
 Release: 1%{?dist}
 License: AGPLv3
 BuildRoot: %{_tmppath}/%{name}-buildroot
@@ -54,6 +54,8 @@ rm -rf %buildroot/
 
 
 %changelog
+* Wed Jan 8 2020 Diogo Castro <diogo.castro@cern.ch> 0.0.6
+- Check home dir is created (or create it) before creating directories
 * Wed Apr 24 2019 Diogo Castro <diogo.castro@cern.ch> 0.0.5
 - Allowed directories defined by configuration
 - Only create folders allowed by us

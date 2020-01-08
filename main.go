@@ -170,6 +170,23 @@ func (ro *router) createHomeDir(w http.ResponseWriter, r *http.Request) {
 	client := api.NewStorageClient(ro.getConn())
 	ro.logger.Info(fmt.Sprintf("createhomedir username=%s dirs2create=%+v", username, dirs))
 
+	// check that homedir exists
+	req := &api.PathReq{Path: "/home"}
+	res, err := client.Inspect(ctx, req)
+	if err != nil {
+		ro.logger.Error("error inspecting homedir", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if res.Status == api.StatusCode_STORAGE_NOT_FOUND {
+		ro.logger.Error("error checking/creating homedir", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	} else {
+		ro.logger.Info("homedir is ok")
+	}
+
 	errDirs := []string{}
 	// homedirectory exists and we check provided list of directories
 	for _, dir := range dirs {
